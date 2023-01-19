@@ -1,0 +1,95 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Observer
+{
+    internal class Camellia : Plant, IObserver, IDisplayElement
+    {
+        Random random = new Random();
+        private double temperature;
+        private double humidity;
+        private double illumination;
+        private double wind;
+        private double height;
+        private bool alive = true;
+
+        private ISubject weatherData;
+
+        public Camellia(ISubject weatherData)
+        {
+            this.weatherData = weatherData;
+            weatherData.registerObserver(this);
+
+        }
+
+        public void update(double temperature, double humidity, double illumination, double wind)
+        {
+            this.temperature = temperature;
+            this.humidity = humidity;
+            this.illumination = illumination;
+            this.wind = wind;
+            Display();
+        }
+
+        public override double Growth()
+        {
+            double increaseHeight = GrowthСoefficient();
+            if (height < 3 && alive)
+                height += increaseHeight;
+            else if (!alive)
+            {
+                if (increaseHeight == -1)
+                    Console.WriteLine("###Камелия погибла от холода!###");
+                if (increaseHeight == -2)
+                    Console.WriteLine("###Камелия завяла от жары!###");
+            }
+            else
+                Console.WriteLine("###Камелия выросла!###");
+            return height;
+        }
+
+        public override double GrowthСoefficient()
+        {
+            double growthСoefficient = 0.5;
+            double decrease = 0;
+
+            if (temperature >= -10 && temperature <= 20)
+                growthСoefficient += random.NextDouble() * 0.6;
+            else if (temperature < -10)
+            {
+                alive = false;
+                return -1;
+            }
+            else if (temperature > 25)
+            {
+                alive = false;
+                return -2;
+            }
+            else
+                decrease += 0.005;
+
+            if (humidity >= 40 && humidity <= 60)
+                growthСoefficient += random.NextDouble() * 0.45;
+            else
+                decrease += 0.05;
+            if (illumination >= 5000 && illumination <= 8000)
+                growthСoefficient += random.NextDouble() * 0.25;
+            else
+                decrease += 0.1;
+            if (wind >= 0 && wind <= 9)
+                growthСoefficient += random.NextDouble() * 0.2;
+            else
+                decrease += 0.005;
+            return growthСoefficient * decrease;
+        }
+
+        public void Display()
+        {
+            Console.WriteLine("Высота Камелии: " + Math.Round(Growth(), 2));
+        }
+    }
+}
+
